@@ -1,0 +1,28 @@
+name: Probe lottery year routes
+
+on:
+  push:
+    branches:
+      - lottery-data-20260813
+    paths:
+      - probe_year_routes.py
+      - .github/workflows/probe-year-routes.yml
+  workflow_dispatch:
+
+jobs:
+  probe-year-routes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install requests
+      - run: python probe_year_routes.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lottery-year-route-probe
+          path: year_route_probe_output/
+          retention-days: 7
