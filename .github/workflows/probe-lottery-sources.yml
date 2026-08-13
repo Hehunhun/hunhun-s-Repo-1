@@ -1,0 +1,38 @@
+name: Probe lottery data sources
+
+on:
+  push:
+    branches:
+      - lottery-data-20260813
+    paths:
+      - probe_sources.py
+      - .github/workflows/probe-lottery-sources.yml
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip requests
+
+      - name: Probe sources
+        run: python probe_sources.py
+
+      - name: Upload probe output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lottery-source-probe
+          path: probe_output/
+          if-no-files-found: warn
+          retention-days: 7
