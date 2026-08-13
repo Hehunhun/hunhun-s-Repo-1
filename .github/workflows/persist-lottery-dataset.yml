@@ -1,0 +1,65 @@
+name: Persist lottery dataset
+
+on:
+  push:
+    branches:
+      - lottery-data-20260813
+    paths:
+      - .github/workflows/persist-lottery-dataset.yml
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  persist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: lottery-data-20260813
+          fetch-depth: 0
+
+      - name: Wait for successful data pull and download artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          rm -rf lottery_output
+          for attempt in $(seq 1 120); do
+            RUN_ID=$(gh run list \
+              --repo "$GITHUB_REPOSITORY" \
+              --workflow pull-lottery-three-years.yml \
+              --branch lottery-data-20260813 \
+              --status success \
+              --limit 1 \
+              --json databaseId \
+              --jq '.[0].databaseId // empty')
+            if [ -n "$RUN_ID" ]; then
+              echo "Downloading artifact from run $RUN_ID"
+              gh run download "$RUN_ID" \
+                --repo "$GITHUB_REPOSITORY" \
+                --name lottery-three-years-dataset \
+                --dir lottery_output
+              break
+            fi
+            echo "Data pull not finished yet (attempt $attempt/120)"
+            sleep 15
+          done
+          test -f lottery_output/summary.json
+          rm -rf lottery_output/error_raw
+
+      - name: Commit dataset to branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lottery_output
+          if git diff --cached --quiet; then
+            echo "No dataset changes to commit"
+            exit 0
+          fi
+          git commit -m "Add three-year lottery dataset"
+          git push origin HEAD:lottery-data-20260813
