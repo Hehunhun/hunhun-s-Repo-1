@@ -1,0 +1,23 @@
+{
+  "date_window": {
+    "start": "2023-08-13",
+    "end": "2026-08-13"
+  },
+  "candidate_periods": 1099,
+  "source_requests": 4396,
+  "valid_source_records_in_window": 4264,
+  "fc3d_periods": 1055,
+  "pl3_periods": 1055,
+  "pl5_periods": 1099,
+  "aligned_dates": 1058,
+  "complete_aligned_dates": 1052,
+  "quality_issue_dates": 6,
+  "non_404_parse_or_request_failures": 0,
+  "elapsed_seconds": 1304.67,
+  "notes": [
+    "福彩3D保留彩宝网和3D之家两套试机号口径，不做强行合并。",
+    "排列五五位试机号来自一定牛模拟页面，明确标记为非官方模拟数据。",
+    "排列五共享三位试机号直接引用同期开奖日期/期号的排列三试机号。",
+    "所有号码按文本保存，以保留前导0。"
+  ]
+}
