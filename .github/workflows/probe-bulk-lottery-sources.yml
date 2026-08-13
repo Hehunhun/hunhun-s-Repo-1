@@ -1,0 +1,29 @@
+name: Probe bulk lottery sources
+
+on:
+  push:
+    branches:
+      - lottery-data-20260813
+    paths:
+      - probe_bulk.py
+      - .github/workflows/probe-bulk-lottery-sources.yml
+  workflow_dispatch:
+
+jobs:
+  probe-bulk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install requests beautifulsoup4 lxml
+      - run: python probe_bulk.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lottery-bulk-source-probe
+          path: bulk_probe_output/
+          if-no-files-found: warn
+          retention-days: 7
